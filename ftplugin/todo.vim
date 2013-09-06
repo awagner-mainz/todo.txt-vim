@@ -15,12 +15,17 @@ set cpo&vim
 " created or edited.
 setlocal textwidth=0
 setlocal wrapmargin=0
+setlocal nowrap
 
 " Mappings {{{1
 " Sort tasks {{{2
 if !hasmapto("<leader>s",'n')
     nnoremap <script> <silent> <buffer> <leader>s :sort<CR>
 endif
+
+" Sort first on Priority, then after dueDate
+" noremap <unique> <script> <buffer>	<leader>S	:sort! /due:/<CR>:sort /.../ r<CR>:1/(A).*due:/-1,/(A)\(.*due:\)\@!/-1sort /due:/<CR>:1/(B).*due:/-1,/(B)\(.*due:\)\@!/-1sort /due:/<CR>:1/(C).*due:/-1,/(C)\(.*due:\)\@!/-1sort /due:/<CR>:1/(D).*due:/-1,/(D)\(.*due:\)\@!/-1sort /due:/<CR>:1/^2.*due:/-1,/^2\(.*due:\)\@!/-1sort /due:/<CR>
+noremap <unique> <script> <buffer>	<leader>S	:sort! /due:/<CR>:sort /.../ r<CR>:0;/(A).*due:/,/(A)\(.*due:\)\@!/-1sort /due:/<CR>:0;/(B).*due:/,/(B)\(.*due:\)\@!/-1sort /due:/<CR>:0;/^2.*due:/,/^2\(.*due:\)\@!/-1sort /due:/<CR>:0;/(C).*due:/e,/(C)\(.*due:\)\@!/-1sort /due:/<CR>:0;/(D).*due:/e,/(D)\(.*due:\)\@!/e-1sort /due:/<CR>
 
 " Insert date {{{2
 if !hasmapto("<leader>d",'n')
