@@ -1,9 +1,10 @@
 " File:        todo.txt.vim
 " Description: Todo.txt filetype detection
-" Author:      Leandro Freitas <freitass@gmail.com>
+" Author:      Leandro Freitas <freitass@gmail.com>,
+"              Andreas Wagner <andreas.wagner@em.uni-frankfurt.de>
 " Licence:     Vim licence
-" Website:     http://github.com/freitass/todo.txt.vim
-" Version:     0.4
+" Website:     http://github.com/awagner-mainz/todo.txt.vim
+" Version:     0.5
 
 " Save context {{{1
 let s:save_cpo = &cpo
@@ -18,31 +19,64 @@ setlocal wrapmargin=0
 setlocal nowrap
 
 " Mappings {{{1
-" Sort tasks {{{2
-if !hasmapto("<leader>s",'n')
-    nnoremap <script> <silent> <buffer> <leader>s :sort<CR>
+" Sort tasks with \SD or \SP (on date or prio) {{{2
+
+" SortDate(): Sort on dueDate (then on Priority) {{{3
+" - bring entries with due: to the top,
+" - bring entries beginnning with x to the bottom,
+" - sort entries with dueDate: on Prio
+" - sort entries with dueDate: on dueDate
+" - sort (unfinished) entries without dueDate: on Prio
+func SortDate()
+    sort! r /due:/
+    sort r /^x /
+    0,/^\(.*due:\)\@!/-1sort r /^.../
+    0,/^\(.*due:\)\@!/-1sort r /due:....-..-../
+    0;/^\(.*due:\)\@!/,/^x /-1sort r /^.../
+endfunc
+
+" SortPrio(): Sort on Priority (then on dueDate) {{{3
+" - bring entries with due: to the top
+" - Sort on Prio
+" - Sort within priorities on dueDate
+func SortPrio()
+    sort! r /due:/
+    sort r /^.../
+    0;/(A).*due:/,/(A)\(.*due:\)\@!/-1sort r /due:....-..-../
+    0;/(B).*due:/,/(B)\(.*due:\)\@!/-1sort r /due:....-..-../
+    0;/(C).*due:/,/(C)\(.*due:\)\@!/-1sort r /due:....-..-../
+    0;/(D).*due:/,/(D)\(.*due:\)\@!/-1sort r /due:....-..-../
+"    0;/^2.*due:/,/^2\(.*due:\)\@!/-1sort /due:/
+endfunc
+
+" Map the fnuctions to <leader>SD and <leader>SP. {{{3
+if !hasmapto("<leader>SD",'n')	" avoid mapping to something that is already
+				" part of another mapping's {rhs}
+    nnoremap <silent> <buffer>	<leader>SD	:call SortDate()<CR>
 endif
 
-" Sort first on Priority, then after dueDate
-" noremap <unique> <script> <buffer>	<leader>S	:sort! /due:/<CR>:sort /.../ r<CR>:1/(A).*due:/-1,/(A)\(.*due:\)\@!/-1sort /due:/<CR>:1/(B).*due:/-1,/(B)\(.*due:\)\@!/-1sort /due:/<CR>:1/(C).*due:/-1,/(C)\(.*due:\)\@!/-1sort /due:/<CR>:1/(D).*due:/-1,/(D)\(.*due:\)\@!/-1sort /due:/<CR>:1/^2.*due:/-1,/^2\(.*due:\)\@!/-1sort /due:/<CR>
-noremap <unique> <script> <buffer>	<leader>S	:sort! /due:/<CR>:sort /.../ r<CR>:0;/(A).*due:/,/(A)\(.*due:\)\@!/-1sort /due:/<CR>:0;/(B).*due:/,/(B)\(.*due:\)\@!/-1sort /due:/<CR>:0;/^2.*due:/,/^2\(.*due:\)\@!/-1sort /due:/<CR>:0;/(C).*due:/e,/(C)\(.*due:\)\@!/-1sort /due:/<CR>:0;/(D).*due:/e,/(D)\(.*due:\)\@!/e-1sort /due:/<CR>
+if !hasmapto("<leader>SP",'n')	" avoid mapping to something that is already
+				" part of another mapping's {rhs}
+    nnoremap <silent> <buffer>	<leader>SP	:call SortPrio()<CR>
+endif
 
-" Insert date {{{2
+
+" Insert date with \d (or date<tab> in insert and visual modes) {{{2
 if !hasmapto("<leader>d",'n')
-    nnoremap <script> <silent> <buffer> <leader>d "=strftime("%Y-%m-%d")<CR>P
+    nnoremap <silent> <buffer>	<leader>d   "=strftime("%Y-%m-%d")<CR>P
 endif
 
 if !hasmapto("date<Tab>",'i')
-    inoremap <script> <silent> <buffer> date<Tab> <C-R>=strftime("%Y-%m-%d")<CR>
+    inoremap <silent> <buffer>	date<Tab>   <C-R>=strftime("%Y-%m-%d")<CR>
 endif
 
 if !hasmapto("<leader>d",'v')
-    vnoremap <script> <silent> <buffer> <leader>d c<C-R>=strftime("%Y-%m-%d")<CR><Esc>
+    vnoremap <silent> <buffer>	<leader>d   c<C-R>=strftime("%Y-%m-%d")<CR><Esc>
 endif
 
-" Mark done {{{2
+" Mark done with \D {{{2
 if !hasmapto("<leader>D",'n')
-    nnoremap <script> <silent> <buffer> <leader>D ix  <ESC>"=strftime("%Y-%m-%d")<CR>P
+    nnoremap <silent> <buffer>  <leader>D	Ix <ESC>"=strftime("%Y-%m-%d")<CR>P
 endif
 
 " Folding {{{1
