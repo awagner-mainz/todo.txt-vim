@@ -76,7 +76,7 @@ endif
 
 " Mark done with \D {{{2
 if !hasmapto("<leader>D",'n')
-    nnoremap <silent> <buffer>  <leader>D	Ix <ESC>"=strftime("%Y-%m-%d")<CR>P
+    nnoremap <silent> <buffer>  <leader>D	Ix  <ESC>"=strftime("%Y-%m-%d")<CR>P
 endif
 
 " Folding {{{1
